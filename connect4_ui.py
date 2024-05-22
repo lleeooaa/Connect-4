@@ -124,6 +124,14 @@ class Game:
                     continue    
                 self.player1_score,self.player2_score=ai.compute_score(self.game.gameboard, pos, self.player1_score, self.player2_score, 1)
                 print(self.player1_score,self.player2_score)
+                """
+                col=ai.evaluate(self.game.gameboard, 2, 6, self.player1_score, self.player2_score, None)[1]
+                pos=self.add_piece(col)
+                if not pos:
+                    continue    
+                self.player1_score,self.player2_score=ai.compute_score(self.game.gameboard, pos, self.player1_score, self.player2_score, 2)
+                print(self.player1_score,self.player2_score)
+                """
 
             for event in pygame.event.get():
                 if event.type == KEYDOWN:
