@@ -42,7 +42,7 @@ class Game:
         self.two_player_rect=self.two_player.get_rect(center=(1000,50))
         self.start_game()
         self.gamemode=None
-        self.player=random.choice([1,2])
+        self.player=0
         self.game=None
         self.player1_score=0
         self.player2_score=0
@@ -55,6 +55,8 @@ class Game:
         self.surface.blit(self.two_player,self.two_player_rect)
         self.game=Gameboard(self.surface)
         self.game.draw()
+        self.player1_score=self.player2_score=0
+        self.player=random.choice([1])
 
     def check_draw(self):
         if '0' not in self.game.gameboard:
@@ -143,13 +145,10 @@ class Game:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     if self.one_player_rect.collidepoint(event.pos):
                         self.start_game()
-                        self.player=random.choice([1,2])
                         self.gamemode=1
-                        self.player1_score=self.player2_score=0
                     if self.two_player_rect.collidepoint(event.pos):
                         self.start_game()
                         self.gamemode=2
-                        self.player1_score=self.player2_score=0
                     if self.gamemode==1 and self.player==2:
                         x, y=pygame.mouse.get_pos()
                         if x>=190 and x<=890 and y>=100 and y<=700:
