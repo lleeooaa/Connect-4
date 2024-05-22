@@ -6,11 +6,16 @@ def count_score(tmp,player1_score,player2_score,player):
     if str(3-player) not in tmp:
         if num==4:
             score[player-1]=np.inf
+        elif num==3:
+            score[player-1]+=2
         else:
             score[player-1]+=1
     else:
         if num==1:
-            score[2-player]-=tmp.count(str(3-player))
+            if tmp.count(str(3-player))==3:
+                score[2-player]-=4
+            else:
+                score[2-player]-=tmp.count(str(3-player))
    
     return score[0],score[1]
 
@@ -47,6 +52,7 @@ def compute_score(gameboard, pos, player1_score, player2_score, player):
 
 def possible_move(gameboard):
     moves=[]
+
     for i in range(7):
         j=gameboard[i*6:i*6+6].find('0')
         moves.append((i,j))
@@ -62,8 +68,6 @@ def place_piece(gameboard, pos, player):
 
 def evaluate(gameboard, player, depth, player1_score, player2_score, col):
     if depth==0:
-        if player2_score==player1_score==np.inf:
-            return 0, col
         if player==1:
             return player2_score-player1_score, col 
         return player1_score-player2_score, col
@@ -75,6 +79,9 @@ def evaluate(gameboard, player, depth, player1_score, player2_score, col):
             continue
         tmp=place_piece(gameboard, move, player)
         tmp1,tmp2=compute_score(tmp, move, player1_score, player2_score, player)
+        if tmp1 == np.inf or tmp2 == np.inf:
+            score_list.append((np.inf,None))
+            continue
         score_list.append(evaluate(tmp, 3-player, depth-1, tmp1, tmp2, move[0]))
     tmp=sorted(score_list, key=lambda tup: tup[0], reverse=True)
     score=None
