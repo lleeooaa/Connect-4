@@ -7,15 +7,15 @@ def count_score(tmp,player1_score,player2_score,player):
         if num==4:
             score[player-1]=np.inf
         elif num==3:
-            score[player-1]+=2
-        else:
+            score[player-1]+=4.5
+        elif num==2:
             score[player-1]+=1
     else:
         if num==1:
             if tmp.count(str(3-player))==3:
-                score[2-player]-=4
-            else:
-                score[2-player]-=tmp.count(str(3-player))
+                score[2-player]-=5.5
+            elif tmp.count(str(3-player))==2:
+                score[2-player]-=1
    
     return score[0],score[1]
 
@@ -92,10 +92,7 @@ def evaluate(gameboard, player, depth, player1_score, player2_score, col):
         break
     if not score:
         return 0, 0
-    if depth==6:
+    if depth==7:
         print(score_list)
     col=score_list.index(score)
     return -score[0], col
-    
-    
-        
