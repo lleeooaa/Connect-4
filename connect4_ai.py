@@ -55,6 +55,8 @@ def possible_move(gameboard):
 
     for i in range(7):
         j=gameboard[i*6:i*6+6].find('0')
+        if j==-1:
+            continue
         moves.append((i,j))
         
     return moves
@@ -66,7 +68,7 @@ def place_piece(gameboard, pos, player):
     gameboard=''.join(gameboard)
     return gameboard
 
-def evaluate(gameboard, player, depth, player1_score, player2_score, col):
+def evaluate(gameboard, player, depth, fixed_depth, player1_score, player2_score, col):
     if depth==0:
         if player==1:
             return player2_score-player1_score, col 
@@ -74,25 +76,22 @@ def evaluate(gameboard, player, depth, player1_score, player2_score, col):
     moves=possible_move(gameboard)
     score_list=[]
     for move in moves:
-        if move[1]==-1:
-            score_list.append((0.1,None))
-            continue
         tmp=place_piece(gameboard, move, player)
         tmp1,tmp2=compute_score(tmp, move, player1_score, player2_score, player)
-        if tmp1 == np.inf or tmp2 == np.inf:
-            score_list.append((np.inf,None))
-            continue
-        score_list.append(evaluate(tmp, 3-player, depth-1, tmp1, tmp2, move[0]))
+        if depth==fixed_depth:
+            if tmp1 == np.inf or tmp2 == np.inf:
+                score_list.append((np.inf,move[0]))
+                continue
+            score_list.append(evaluate(tmp, 3-player, depth-1, fixed_depth, tmp1, tmp2, move[0]))
+        else:
+            if tmp1 == np.inf or tmp2 == np.inf:
+                score_list.append((np.inf,col))
+                continue
+            score_list.append(evaluate(tmp, 3-player, depth-1, fixed_depth, tmp1, tmp2, col))
     tmp=sorted(score_list, key=lambda tup: tup[0], reverse=True)
-    score=None
-    for i in tmp:
-        if i[0]==0.1:
-            continue
-        score=i
-        break
-    if not score:
-        return 0, 0
-    if depth==7:
+    if tmp==[]:
+        return 0, col
+    score=tmp[0]
+    if depth==fixed_depth:
         print(score_list)
-    col=score_list.index(score)
-    return -score[0], col
+    return -score[0], score[1]
