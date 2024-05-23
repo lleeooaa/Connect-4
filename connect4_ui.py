@@ -46,6 +46,7 @@ class Game:
         self.game=None
         self.player1_score=0
         self.player2_score=0
+        self.round=0
 
     def start_game(self):
         self.surface.fill((99,78,52))
@@ -57,6 +58,7 @@ class Game:
         self.game.draw()
         self.player1_score=self.player2_score=0
         self.player=random.choice([1,2])
+        self.round=1
 
     def check_draw(self):
         if '0' not in self.game.gameboard:
@@ -89,6 +91,7 @@ class Game:
                     self.player=2
                 else:
                     self.player=1
+                self.round+=1
                 return (col,i)
 
     def check_win(self, pos, player):
@@ -120,7 +123,10 @@ class Game:
         pygame.display.flip()
         while running:
             if self.gamemode==1 and self.player==1:
-                col=ai.evaluate(self.game.gameboard, 1, 7, self.player1_score, self.player2_score, None)[1]
+                if self.round<10:
+                    col=ai.evaluate(self.game.gameboard, 1, 6, 6, self.player1_score, self.player2_score, None)[1]
+                else:
+                    col=ai.evaluate(self.game.gameboard, 1, 7, 7, self.player1_score, self.player2_score, None)[1]
                 pos=self.add_piece(col)
                 if not pos:
                     continue    
