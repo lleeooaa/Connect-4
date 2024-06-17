@@ -2,6 +2,8 @@ import pygame
 from pygame.locals import *
 import random
 import connect4_ai as ai
+import threading
+import time
 
 class Gameboard:
     def __init__(self, parent_screen):
@@ -29,6 +31,20 @@ class Piece:
         else:
             pygame.draw.circle(self.parent_screen, (255,244,155), pos, 49)
         pygame.display.flip()
+
+class AIThread(threading.Thread):
+    def __init__(self, gameboard, player, depth, player1_score, player2_score, round):
+        super().__init__()
+        self.gameboard = gameboard
+        self.player = player
+        self.depth = depth
+        self.player1_score = player1_score
+        self.player2_score = player2_score
+        self.round = round
+        self.result = None
+
+    def run(self):
+        self.result = ai.evaluate_entry(self.gameboard, self.player, self.depth, self.player1_score, self.player2_score, self.round)
 
 class Game:
     def __init__(self):
@@ -58,7 +74,7 @@ class Game:
         self.game.draw()
         self.player1_score=self.player2_score=0
         self.player=random.choice([1,2])
-        self.round=1
+        self.round=0
 
     def check_draw(self):
         if '0' not in self.game.gameboard:
@@ -81,7 +97,7 @@ class Game:
                     if self.check_draw():
                         text='Draw'
                     self.textbox=self.font.render(text, True, (0,0,0))
-                    self.textbox_rect=self.two_player.get_rect(center=(540,50))
+                    self.textbox_rect=self.textbox.get_rect(center=(540,50))
                     pygame.draw.rect(self.surface, (99,78,52), self.textbox_rect)
                     self.surface.blit(self.textbox,self.textbox_rect)
                     pygame.display.flip()
@@ -123,14 +139,15 @@ class Game:
         pygame.display.flip()
         while running:
             if self.gamemode==1 and self.player==1:
-                if self.round<10:
-                    col=ai.evaluate(self.game.gameboard, 1, 6, 6, self.player1_score, self.player2_score, None)[1]
-                else:
-                    col=ai.evaluate(self.game.gameboard, 1, 7, 7, self.player1_score, self.player2_score, None)[1]
+                ai_thread = AIThread(self.game.gameboard, 1, 8, self.player1_score, self.player2_score, self.round)
+                ai_thread.start()
+                while ai_thread.is_alive():
+                    time.sleep(0.5)  #buffer
+                col = ai_thread.result[1]
                 pos=self.add_piece(col)
                 if not pos:
                     continue    
-                self.player1_score,self.player2_score=ai.compute_score(self.game.gameboard, pos, self.player1_score, self.player2_score, 1)
+                self.player1_score,self.player2_score=ai.compute_score(self.game.gameboard, pos, self.player1_score, self.player2_score, 1, self.round)
                 print(self.player1_score,self.player2_score)
                 """
                 col=ai.evaluate(self.game.gameboard, 2, 7, self.player1_score, self.player2_score, None)[1]
@@ -162,7 +179,7 @@ class Game:
                             pos=self.add_piece(col)
                             if not pos:
                                 continue    
-                            self.player1_score,self.player2_score=ai.compute_score(self.game.gameboard, pos, self.player1_score, self.player2_score, 2)
+                            self.player1_score,self.player2_score=ai.compute_score(self.game.gameboard, pos, self.player1_score, self.player2_score, 2, self.round)
                             print(self.player1_score,self.player2_score)
                                 
                     if self.gamemode==2:
@@ -172,7 +189,7 @@ class Game:
                             pos=self.add_piece(col)
                             if not pos:
                                 continue  
-                            self.player1_score,self.player2_score=ai.compute_score(self.game.gameboard, pos, self.player1_score, self.player2_score, 3-self.player)
+                            self.player1_score,self.player2_score=ai.compute_score(self.game.gameboard, pos, self.player1_score, self.player2_score, 3-self.playe, self.round)
                             print(self.player1_score,self.player2_score)
                             
 if __name__ == "__main__":
